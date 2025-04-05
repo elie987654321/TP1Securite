@@ -21,8 +21,10 @@ public class RESTService
     @Autowired
     private HttpServletRequest request;
 
+    public int maxConnectionByDay = 10;
+
     @GetMapping("/YouCantDOSMe")
-    public void YouCantDOSMe()
+    public long YouCantDOSMe()
     {
         try
         {
@@ -43,7 +45,8 @@ public class RESTService
 
                     int nombreRequetes = Integer.parseInt(nombreRequetesString);
 
-                    if (nombreRequetes < 10) {
+                    if (nombreRequetes < maxConnectionByDay)
+                    {
                         nombreRequetes++;
                         FileWriter writer = new FileWriter(ipFile);
                         writer.write(LocalDate.now().toString() + "\n");
@@ -51,24 +54,48 @@ public class RESTService
                         String nouveauNombreRequeteString = String.valueOf(nombreRequetes);
                         writer.write(nouveauNombreRequeteString);
 
-
                         writer.close();
-                    }
 
-                    int t = 0;
+                        return Traitement.CalculerUnGrandNombre();
+                    }
+                    else
+                    {
+                        return 69420;
+                    }
+                }
+                else
+                {
+                    CreateOrResetIpFile(fileUser);
+                    return Traitement.CalculerUnGrandNombre();
                 }
             }
             else
             {
-                fileUser.createNewFile();
+                CreateOrResetIpFile(fileUser);
 
-                FileWriter writer = new FileWriter(ipFile);
-                writer.write(LocalDate.now().toString() + "\n");
-                writer.write("1");
-                writer.close();
+                return Traitement.CalculerUnGrandNombre();
             }
         }
         catch(Exception e)
+        {
+            System.out.println(e.getMessage());
+        }
+
+        return 0;
+    }
+
+    public void CreateOrResetIpFile(File file)
+    {
+        try
+        {
+            file.createNewFile();
+
+            FileWriter writer = new FileWriter(file);
+            writer.write(LocalDate.now().toString() + "\n");
+            writer.write("1");
+            writer.close();
+        }
+        catch (Exception e)
         {
             System.out.println(e.getMessage());
         }
